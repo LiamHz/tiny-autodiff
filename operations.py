@@ -14,7 +14,7 @@ class Ops:
   def __truediv__(self, other):
     return Mul(self, Inv(other))
 
-class Leaf(Ops):
+class Var(Ops):
   """A leaf node"""
   def __init__(self, value: float):
     self.value = value
