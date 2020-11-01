@@ -1,53 +1,42 @@
-from tests import test_ops
 import numpy as np
-from grad import Value, get_gradients
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-def update_weights(weights, grads, lr):
-  for i in range(weights.shape[0]):
-    for j in range(weights.shape[1]):
-      weights[i, j].value -= lr * grads[weights[i, j]]
+from nn import MLP
+from grad import Value
+from tests import test_ops
 
 def main():
-  lr = 0.01
-  min_pct_delta_loss = 0.001
-  min_iters = 3
+  lr = 0.001
   input_size = 50
   output_size = 10
-
-  # Functions to vectorize and un-vectorize Value objects 
-  to_var = np.vectorize(lambda x: Value(x))
-  to_vals = np.vectorize(lambda var: var.value)
+  n_iterations = 100
 
   # Both input and "ground truth" are random vectors
-  x = to_var(np.random.random(input_size))
-  y = to_var(np.random.random(output_size))
+  x = np.random.random(input_size)
+  y = np.random.random(output_size)
 
   # Randomly initialize neural network weights
-  weights = to_var(np.random.random((input_size, output_size)))
+  #weights = to_value(np.random.random((input_size, output_size)))
+  nn = MLP(input_size, output_size, [5, 10, 20])
+  print(nn.layers[0])
 
   losses = []
-  for i in range(1000):
-    y_pred = np.dot(x, weights)
-
+  for i in tqdm(range(100)):
+    y_pred = nn(x)
     loss = np.sum((y - y_pred) * (y - y_pred))
-    losses.append(loss.value)
+    losses.append(loss.data)
 
-    # Stop training early if loss isn't changing much
-    try:
-      pct_delta_loss = (losses[-2] - losses[-1]) / losses[-2]
-    except IndexError:
-      pct_delta_loss = 0.1
-    if pct_delta_loss < min_pct_delta_loss:
-      break
+    loss.backward()
+    for p in nn.parameters():
+      p.data -= lr * p.grad
 
-    grads = get_gradients(loss)
-    update_weights(weights, grads, lr)
+    nn.zero_grad()
 
   plt.plot(losses)
   plt.ylabel('Loss')
   plt.xlabel('Iteration')
-  plt.title('Single layer network fitting random noise')
+  plt.title('Multilayer perceptron fitting random noise')
   plt.show()
 
 if __name__ == '__main__':

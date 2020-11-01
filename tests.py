@@ -1,4 +1,4 @@
-from grad2 import Value
+from grad import Value
 
 def test_ops():
   def net(a, b):
