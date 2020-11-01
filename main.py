@@ -1,7 +1,6 @@
 from tests import test_ops
 import numpy as np
-from operations import Var
-from core import get_gradients
+from grad import Value, get_gradients
 import matplotlib.pyplot as plt
 
 def update_weights(weights, grads, lr):
@@ -10,15 +9,14 @@ def update_weights(weights, grads, lr):
       weights[i, j].value -= lr * grads[weights[i, j]]
 
 def main():
-  #test_ops()
   lr = 0.01
   min_pct_delta_loss = 0.001
   min_iters = 3
   input_size = 50
   output_size = 10
 
-  # Functions to vectorize and un-vectorize Var objects 
-  to_var = np.vectorize(lambda x: Var(x))
+  # Functions to vectorize and un-vectorize Value objects 
+  to_var = np.vectorize(lambda x: Value(x))
   to_vals = np.vectorize(lambda var: var.value)
 
   # Both input and "ground truth" are random vectors
